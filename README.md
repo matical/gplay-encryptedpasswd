@@ -18,5 +18,7 @@ $encrypted = new Encrypt($gmailAddress, new HiddenString($gmailPassword));
 
 ## Credits/Other Libraries
 https://github.com/dweinstein/node-google-play/blob/e1d66c2f7f65afd8c373e65be59848de8b660be3/lib/login.js
+
 https://github.com/subtletech/google_play_store_password_encrypter
+
 https://github.com/yeriomin/play-store-api/blob/040d1f282fa165f2568e8b64a053a9cbf19aa615/src/main/java/com/github/yeriomin/playstoreapi/PasswordEncrypter.java
