@@ -1,0 +1,24 @@
+{
+    "name": "ksmz/gplay-encryptedpasswd",
+    "description": "Handles the creation of the EncryptedPasswd required in Play Store's API calls",
+    "type": "library",
+    "license": "BSD-2-Clause",
+    "authors": [
+        {
+            "name": "ksmz",
+            "email": "ksmz@amatsuka.me"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "ksmz\\GPEncryptedPasswd\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=7.1",
+        "phpseclib/phpseclib": "^2.0",
+        "paragonie/hidden-string": "^1.0"
+    },
+    "require-dev": {
+    }
+}
