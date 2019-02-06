@@ -80,7 +80,7 @@ class Encrypt
 
     /**
      * @param $binaryKey
-     * @return array[]
+     * @return array
      */
     protected function decomposeKey($binaryKey)
     {
