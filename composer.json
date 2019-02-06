@@ -1,6 +1,6 @@
 {
     "name": "ksmz/gplay-encryptedpasswd",
-    "description": "Handles the creation of the EncryptedPasswd required in Play Store's API calls",
+    "description": "Handles the creation of the EncryptedPasswd field, required in Play Store's API calls",
     "type": "library",
     "license": "BSD-2-Clause",
     "authors": [
