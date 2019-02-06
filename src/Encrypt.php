@@ -74,7 +74,7 @@ class Encrypt
     {
         $this->rsa = new RSA();
         $this->rsa->setPublicKeyFormat(RSA::PUBLIC_FORMAT_PKCS1_RAW);
-        $this->rsa->loadKey(["modulus" => $modulus, "exponent" => $exponent]);
+        $this->rsa->loadKey(['modulus' => $modulus, 'exponent' => $exponent]);
         $this->rsa->setPublicKey();
     }
 
@@ -110,7 +110,7 @@ class Encrypt
         $digest = sha1($this->binaryKey(), true);
         $trimmed = substr($digest, 0, 4);
 
-        return "00" . bin2hex($trimmed);
+        return '00' . bin2hex($trimmed);
     }
 
     /**
@@ -119,6 +119,6 @@ class Encrypt
      */
     protected function safeBase64($output)
     {
-        return str_replace(["+", "/"], ["-", "_"], base64_encode($output));
+        return str_replace(['+', '/'], ['-', '_'], base64_encode($output));
     }
 }
