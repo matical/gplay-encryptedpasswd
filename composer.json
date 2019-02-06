@@ -18,7 +18,5 @@
         "php": ">=7.1",
         "phpseclib/phpseclib": "^2.0",
         "paragonie/hidden-string": "^1.0"
-    },
-    "require-dev": {
     }
 }
