@@ -23,6 +23,8 @@ class Encrypt
     /**
      * @param  string  $email  Gmail Address
      * @param  \ParagonIE\HiddenString\HiddenString  $password  Gmail Password
+     *
+     * @throws \UnexpectedValueException phpspeclib did not return an instance of \phpseclib3\Crypt\RSA\PublicKey
      */
     public function __construct(string $email, HiddenString $password)
     {
@@ -63,7 +65,7 @@ class Encrypt
         ]);
 
         if (! ($this->rsa instanceof RSA\PublicKey)) {
-            throw new UnexpectedValueException("Expected phpspeclib to return a RSA\PublicKey instance");
+            throw new UnexpectedValueException("Expected phpspeclib to return an instance of \phpseclib3\Crypt\RSA\PublicKey");
         }
     }
 
