@@ -15,8 +15,16 @@
         }
     },
     "require": {
-        "php": ">=7.1",
-        "phpseclib/phpseclib": "^2.0",
-        "paragonie/hidden-string": "^1.0"
+        "php": "^7.4|^8",
+        "phpseclib/phpseclib": "^3.0",
+        "paragonie/hidden-string": "^2.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^1.21"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     }
 }

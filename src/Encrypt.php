@@ -2,87 +2,86 @@
 
 namespace ksmz\GPEncryptedPasswd;
 
-use phpseclib\Crypt\RSA;
-use phpseclib\Math\BigInteger;
+use phpseclib3\Crypt\Common\PublicKey;
+use phpseclib3\Crypt\RSA;
+use phpseclib3\Math\BigInteger;
 use ParagonIE\HiddenString\HiddenString;
+use UnexpectedValueException;
 
 class Encrypt
 {
-    /** @var string */
-    protected $email;
+    protected string $email;
 
-    /** @var string */
-    protected $password;
+    protected HiddenString $password;
 
-    /** @var \phpseclib\Crypt\RSA */
-    protected $rsa;
+    protected PublicKey $rsa;
 
-    /** @var string */
-    protected $payloadFormat = "%s\u{0000}%s";
+    private const PAYLOAD_FORMAT = "%s\u{0000}%s";
 
-    /** @var string */
-    const GOOGLE_DEFAULT_PUBLIC_KEY = 'AAAAgMom/1a/v0lblO2Ubrt60J2gcuXSljGFQXgcyZWveWLEwo6prwgi3iJIZdodyhKZQrNWp5nKJ3srRXcUW+F1BD3baEVGcmEgqaLZUNBjm057pKRI16kB0YppeGx5qIQ5QjKzsR8ETQbKLNWgRY0QRNVz34kMJR3P/LgHax/6rmf5AAAAAwEAAQ==';
+    public const GOOGLE_DEFAULT_PUBLIC_KEY = 'AAAAgMom/1a/v0lblO2Ubrt60J2gcuXSljGFQXgcyZWveWLEwo6prwgi3iJIZdodyhKZQrNWp5nKJ3srRXcUW+F1BD3baEVGcmEgqaLZUNBjm057pKRI16kB0YppeGx5qIQ5QjKzsR8ETQbKLNWgRY0QRNVz34kMJR3P/LgHax/6rmf5AAAAAwEAAQ==';
 
     /**
-     * @param string                               $email    Gmail Address
-     * @param \ParagonIE\HiddenString\HiddenString $password Gmail Password
+     * @param  string  $email  Gmail Address
+     * @param  \ParagonIE\HiddenString\HiddenString  $password  Gmail Password
      */
     public function __construct(string $email, HiddenString $password)
     {
         $this->email = $email;
-        $this->password = $password->getString();
-    }
+        $this->password = $password;
 
-    /**
-     * @return string
-     */
-    public function encrypt()
-    {
         [$modulus, $exponent] = $this->decomposeKey($this->hexKey());
         $this->initRSA($modulus, $exponent);
-
-        $encrypted = $this->rsa->encrypt(
-            sprintf($this->payloadFormat, $this->email, $this->password)
-        );
-        $finalPayload = hex2bin($this->signature() . bin2hex($encrypted));
-        $encryptedPasswd = $this->safeBase64($finalPayload);
-
-        return $encryptedPasswd;
     }
 
     /**
+     * Generates a valid `EncryptedPasswd` with the given email and password.
+     *
      * @return string
      */
-    protected function hexKey()
+    public function encrypt(): string
+    {
+        $encrypted = $this->rsa->encrypt(
+            sprintf(self::PAYLOAD_FORMAT, $this->email, $this->password->getString())
+        );
+        $finalPayload = hex2bin($this->signature().bin2hex($encrypted));
+
+        return $this->safeBase64($finalPayload);
+    }
+
+    /**
+     * @param  \phpseclib3\Math\BigInteger  $modulus
+     * @param  \phpseclib3\Math\BigInteger  $exponent
+     * @return void
+     *
+     * @throws \UnexpectedValueException
+     */
+    protected function initRSA(BigInteger $modulus, BigInteger $exponent): void
+    {
+        $this->rsa = RSA::loadPublicKey([
+            'e' => $exponent,
+            'n' => $modulus,
+        ]);
+
+        if (! ($this->rsa instanceof RSA\PublicKey)) {
+            throw new UnexpectedValueException("Expected phpspeclib to return a RSA\PublicKey instance");
+        }
+    }
+
+    protected function hexKey(): string
     {
         return bin2hex($this->binaryKey());
     }
 
-    /**
-     * @return string
-     */
-    protected function binaryKey()
+    protected function binaryKey(): string
     {
         return base64_decode(self::GOOGLE_DEFAULT_PUBLIC_KEY);
     }
 
     /**
-     * @param $modulus
-     * @param $exponent
+     * @param  string  $binaryKey
+     * @return array<\phpseclib3\Math\BigInteger>
      */
-    protected function initRSA($modulus, $exponent)
-    {
-        $this->rsa = new RSA();
-        $this->rsa->setPublicKeyFormat(RSA::PUBLIC_FORMAT_PKCS1_RAW);
-        $this->rsa->loadKey(['modulus' => $modulus, 'exponent' => $exponent]);
-        $this->rsa->setPublicKey();
-    }
-
-    /**
-     * @param $binaryKey
-     * @return array
-     */
-    protected function decomposeKey($binaryKey)
+    protected function decomposeKey(string $binaryKey): array
     {
         $firstSegment = substr($binaryKey, 8, 256);
         $modulus = $this->toBigInt($firstSegment);
@@ -93,31 +92,20 @@ class Encrypt
         return [$modulus, $exponent];
     }
 
-    /**
-     * @param string $segment
-     * @return \phpseclib\Math\BigInteger
-     */
-    protected function toBigInt($segment)
+    protected function toBigInt(string $segment): BigInteger
     {
         return new BigInteger(hex2bin($segment), 256);
     }
 
-    /**
-     * @return string
-     */
-    protected function signature()
+    protected function signature(): string
     {
         $digest = sha1($this->binaryKey(), true);
         $trimmed = substr($digest, 0, 4);
 
-        return '00' . bin2hex($trimmed);
+        return '00'.bin2hex($trimmed);
     }
 
-    /**
-     * @param $output
-     * @return string
-     */
-    protected function safeBase64($output)
+    protected function safeBase64(string $output): string
     {
         return str_replace(['+', '/'], ['-', '_'], base64_encode($output));
     }
